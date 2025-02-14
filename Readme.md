@@ -73,42 +73,20 @@ This project is an AI chatbot website similar to Chai AI, allowing users to chat
 
 ### DevOps & Monitoring
 - **CI/CD**
-  - GitHub Actions
   - Automated testing
-  - Automated deployment
-
-- **Monitoring**
-  - Sentry (Error tracking)
-  - Grafana (Metrics)
-  - LogRocket (User sessions)
 
 ### Security
 - **Authentication**
   - NextAuth.js / Clerk
-  - JWT tokens
-  - OAuth providers
 
 - **API Security**
   - Rate limiting
-  - CORS protection
-  - Input validation
-  - XSS protection
 
 ### Additional Tools
-- **Payment Processing**
-  - Stripe
-  - PayPal integration
 
 - **Analytics**
   - Mixpanel / PostHog
-  - Custom event tracking
-  - User behavior analysis
 
-## 🔧 Development Setup
-1. Node.js 18+ required
-2. MongoDB local or Atlas instance
-3. Redis instance
-4. OpenAI API key
 
 ## 💡 Future Enhancements
 - Voice & Image Support
