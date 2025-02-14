@@ -12,23 +12,103 @@ This project is an AI chatbot website similar to Chai AI, allowing users to chat
 - **Analytics** – Tracks user interactions and chatbot performance
 
 ## 🛠 Tech Stack
+
 ### Frontend
-- React.js (or Next.js)
-- Tailwind CSS / Material UI 
-- Vercel / Netlify (Hosting)
+- **Next.js 14** (with App Router)
+  - Server-side rendering for better SEO
+  - Built-in API routes
+  - Fast page loads with server components
+  - Great TypeScript support
+
+- **TailwindCSS**
+  - Rapid UI development
+  - Highly customizable
+  - Small bundle size
+  - Great for responsive design
+
+- **State Management**
+  - Zustand for global state
+  - React Query for server state
+  - Socket.io-client for real-time features
 
 ### Backend
-- Node.js with Express.js
-- MongoDB / PostgreSQL
-- WebSockets
-- OpenAI API
-- Stripe (Payments)
+- **Node.js with Express.js**
+  - Fast development
+  - Large ecosystem
+  - Easy to scale
+  - Great for real-time applications
 
-### Deployment
-- Vercel (Frontend)
-- Render / AWS (Backend)
-- AWS S3 (Storage)
+- **Database**
+  - MongoDB (Primary database)
+    - Flexible schema for chat data
+    - Easy scaling
+    - Good for real-time data
+  - Redis (Caching)
+    - Session management
+    - Rate limiting
+    - Chat history caching
 
+- **AI Integration**
+  - OpenAI API (GPT-4)
+  - Anthropic Claude API (Alternative)
+  - Local embeddings for custom knowledge
+
+- **Real-time Communication**
+  - Socket.io
+  - WebSocket for chat features
+  - Server-Sent Events for notifications
+
+### Infrastructure
+- **Deployment**
+  - Vercel (Frontend)
+  - Railway or Render (Backend)
+  - MongoDB Atlas (Database)
+  - Upstash (Redis)
+
+- **Storage**
+  - AWS S3 / Cloudinary
+    - User uploads
+    - Bot avatars
+    - Media storage
+
+### DevOps & Monitoring
+- **CI/CD**
+  - GitHub Actions
+  - Automated testing
+  - Automated deployment
+
+- **Monitoring**
+  - Sentry (Error tracking)
+  - Grafana (Metrics)
+  - LogRocket (User sessions)
+
+### Security
+- **Authentication**
+  - NextAuth.js / Clerk
+  - JWT tokens
+  - OAuth providers
+
+- **API Security**
+  - Rate limiting
+  - CORS protection
+  - Input validation
+  - XSS protection
+
+### Additional Tools
+- **Payment Processing**
+  - Stripe
+  - PayPal integration
+
+- **Analytics**
+  - Mixpanel / PostHog
+  - Custom event tracking
+  - User behavior analysis
+
+## 🔧 Development Setup
+1. Node.js 18+ required
+2. MongoDB local or Atlas instance
+3. Redis instance
+4. OpenAI API key
 
 ## 💡 Future Enhancements
 - Voice & Image Support
