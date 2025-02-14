@@ -8,15 +8,17 @@ import messageRoutes from './routes/messages.js';
 dotenv.config();
 
 // Verify environment variables
-if (!process.env.MONGODB_URI) {
-    console.error('MONGODB_URI is not defined in .env file');
+if (!process.env.MONGODB_URI || !process.env.OPENAI_API_KEY) {
+    console.error('Required environment variables are not defined');
     process.exit(1);
 }
 
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
+}));
 app.use(express.json());
 
 // Enhanced MongoDB Connection
@@ -57,8 +59,8 @@ const connectDB = async () => {
 connectDB();
 
 // Routes
-app.get('/api/test', (req, res) => {
-    res.json({ message: 'API is working!' });
+app.get('/test', (req, res) => {
+    res.json({ message: 'Server is running!' });
 });
 
 app.use('/api/messages', messageRoutes);
@@ -85,11 +87,12 @@ process.on('SIGINT', async () => {
 });
 
 const startServer = async (retryCount = 0) => {
-    const PORT = parseInt(process.env.PORT || '5000') + retryCount;
+    const PORT = parseInt(process.env.PORT || '5001') + retryCount;
     
     try {
         const server = app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}`);
+            console.log(`Test the API: curl http://localhost:${PORT}/test`);
         });
 
         server.on('error', (error) => {
