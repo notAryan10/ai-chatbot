@@ -14,7 +14,7 @@ This project is an AI chatbot website similar to Chai AI, allowing users to chat
 ## 🛠 Tech Stack
 ### Frontend
 - React.js (or Next.js)
-- Tailwind CSS / Material UI
+- Tailwind CSS / Material UI 
 - Vercel / Netlify (Hosting)
 
 ### Backend
