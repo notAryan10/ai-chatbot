@@ -5,9 +5,12 @@ const messageSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    role: {
+    userId: {
         type: String,
-        enum: ['user', 'assistant', 'system'],
+        required: true
+    },
+    aiResponse: {
+        type: String,
         required: true
     },
     timestamp: {

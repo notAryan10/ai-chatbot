@@ -2,51 +2,57 @@ import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import messageRoutes from './routes/messages.js';
 
-// Load .env file
-dotenv.config();
+// Fix for __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-// Verify environment variables
-if (!process.env.MONGODB_URI || !process.env.OPENAI_API_KEY) {
-    console.error('Required environment variables are not defined');
+// Load .env file early
+const result = dotenv.config();
+
+if (result.error) {
+    console.error('Error loading .env file:', result.error);
     process.exit(1);
 }
+
+// Verify environment variables
+const requiredEnvVars = {
+    MONGODB_URI: process.env.MONGODB_URI,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY
+};
+
+console.log('Environment variables loaded:', {
+    MONGODB_URI: process.env.MONGODB_URI ? 'Set' : 'Not set',
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'Set' : 'Not set',
+    PORT: process.env.PORT || '5005 (default)'
+});
 
 const app = express();
 
 // Middleware
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000'
+    origin: ['http://localhost:3003', 'http://localhost:3002', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
 // Enhanced MongoDB Connection
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGODB_URI, {
+        await mongoose.connect(process.env.MONGODB_URI, {
             useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverApi: {
-                version: '1',
-                strict: true,
-                deprecationErrors: true,
-            }
+            useUnifiedTopology: true
         });
         
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        console.log('MongoDB Connected');
         
-        // Handle connection events
         mongoose.connection.on('error', err => {
             console.error('MongoDB connection error:', err);
-        });
-
-        mongoose.connection.on('disconnected', () => {
-            console.warn('MongoDB disconnected. Attempting to reconnect...');
-        });
-
-        mongoose.connection.on('reconnected', () => {
-            console.log('MongoDB reconnected');
         });
 
     } catch (error) {
@@ -55,19 +61,25 @@ const connectDB = async () => {
     }
 };
 
-// Connect to MongoDB
-connectDB();
-
 // Routes
 app.get('/test', (req, res) => {
-    res.json({ message: 'Server is running!' });
+    res.json({ 
+        message: 'Server is running!',
+        openai: process.env.OPENAI_API_KEY ? 'OpenAI key is set' : 'OpenAI key is missing',
+        mongodb: mongoose.connection.readyState === 1 ? 'MongoDB is connected' : 'MongoDB is not connected'
+    });
 });
 
 app.use('/api/messages', messageRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('Global error handler:', {
+        message: err.message,
+        stack: err.stack,
+        details: err.response?.data || err.cause || err
+    });
+
     res.status(500).json({ 
         message: 'Something went wrong!',
         error: process.env.NODE_ENV === 'development' ? err.message : undefined
@@ -86,25 +98,46 @@ process.on('SIGINT', async () => {
     }
 });
 
+// Make sure MongoDB connects before starting the server
 const startServer = async (retryCount = 0) => {
-    const PORT = parseInt(process.env.PORT || '5001') + retryCount;
-    
     try {
-        const server = app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}`);
-            console.log(`Test the API: curl http://localhost:${PORT}/test`);
-        });
+        await connectDB();
+        
+        const basePort = parseInt(process.env.PORT || '5005');
+        const port = basePort + retryCount;  // This will increment by 1 each time
 
-        server.on('error', (error) => {
+        try {
+            const server = await new Promise((resolve, reject) => {
+                const server = app.listen(port, () => {
+                    console.log(`Server is running on port ${port}`);
+                    console.log(`Test the API: curl http://localhost:${port}/test`);
+                    resolve(server);
+                });
+
+                server.on('error', (error) => {
+                    if (error.code === 'EADDRINUSE' && retryCount < 5) {
+                        console.log(`Port ${port} is in use, trying port ${port + 1}...`);
+                        server.close();
+                        resolve(null);
+                    } else {
+                        reject(error);
+                    }
+                });
+            });
+
+            if (!server && retryCount < 5) {
+                return startServer(retryCount + 1);
+            }
+
+        } catch (error) {
             if (error.code === 'EADDRINUSE') {
-                console.log(`Port ${PORT} is in use, trying ${PORT + 1}...`);
-                server.close();
-                startServer(retryCount + 1);
+                console.error(`All ports from ${basePort} to ${port} are in use. Please free up a port or specify a different port.`);
             } else {
                 console.error('Server error:', error);
-                process.exit(1);
             }
-        });
+            process.exit(1);
+        }
+
     } catch (error) {
         console.error('Failed to start server:', error);
         process.exit(1);
