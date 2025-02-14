@@ -1,4 +1,4 @@
-# AI Chatbot Website (Like Chai AI)
+# AI Chatbot Website
 
 ## 📌 Project Overview
 This project is an AI chatbot website similar to Chai AI, allowing users to chat with AI personalities, create their own chatbots, and engage in real-time conversations. The site includes authentication, a chatbot creation tool, and monetization features.
